@@ -13,7 +13,7 @@ class RouterFactory
     public function __invoke(ContainerInterface $container): RouterInterface
     {
         $RouteMatcher = $container->get(RouteMatcherInterface::class);
-        Assert::assertInstanceOf($RouteMatcher, RouteMatcherInterface::class);
+        Assert::assertInstanceOf(RouteMatcherInterface::class, $RouteMatcher);
 
         return new Router($RouteMatcher);
     }
