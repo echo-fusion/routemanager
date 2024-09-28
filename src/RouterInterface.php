@@ -60,5 +60,13 @@ interface RouterInterface
      */
     public function delete(string $name, string $path, array|Closure $action, ?array $constraints = []): self;
 
+    /**
+     * @param non-empty-string $name
+     * @param non-empty-string $path
+     * @param list<non-empty-string>|Closure $action
+     * @param array<array-key,non-empty-string>|null $constraints
+     */
+    public function options(string $name, string $path, array|Closure $action, ?array $constraints = []): self;
+
     public function dispatch(ServerRequestInterface $request): RouteMatchInterface;
 }

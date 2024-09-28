@@ -82,6 +82,11 @@ class Router implements RouterInterface
         return $this->register(HttpMethod::DELETE, $name, $path, $action, $constraints);
     }
 
+    public function options(string $name, string $path, array|Closure $action, ?array $constraints = []): self
+    {
+        return $this->register(HttpMethod::OPTIONS, $name, $path, $action, $constraints);
+    }
+
     private function register(
         HttpMethod $method,
         string $name,
