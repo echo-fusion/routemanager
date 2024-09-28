@@ -19,10 +19,8 @@ class RouterFactoryTest extends TestCase
 
     public function testInvokeReturnsRouterInstance(): void
     {
-        // Create a mock for RouteMatcherInterface
         $routeMatcherMock = $this->createMock(RouteMatcherInterface::class);
 
-        // Create a mock for ContainerInterface
         $containerMock = $this->createMock(ContainerInterface::class);
         $containerMock->method('get')
             ->with(RouteMatcherInterface::class)
@@ -31,10 +29,6 @@ class RouterFactoryTest extends TestCase
         // Invoke the factory
         $router = ($this->routerFactory)($containerMock);
 
-        // Assert that the returned object is an instance of RouterInterface
         $this->assertInstanceOf(RouterInterface::class, $router);
-
-        // Assert that the router was created with the correct RouteMatcher
-//        $this->assertSame($routeMatcherMock, $router->getRouteMatcher());
     }
 }
