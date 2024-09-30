@@ -1,7 +1,7 @@
 {
     "name": "echo-fusion/routemanager",
-    "description": "a route manager",
-    "keywords": ["route manager"],
+    "description": "A lightweight and flexible routing package that helps manage HTTP routes in PHP applications. Supports PSR-7 and PSR-15, designed for MVC architecture with middleware integration.",
+    "keywords": ["routing", "PHP", "PSR-7", "PSR-15", "middleware", "MVC"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -18,17 +18,8 @@
         "phpunit/phpunit": "^9.5",
         "vimeo/psalm": "5.x-dev",
         "friendsofphp/php-cs-fixer": "dev-master",
-        "echo-fusion/codestandard": "0.x-dev"
+        "echo-fusion/codestandard": "^1.0"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../codestandard",
-            "options": {
-                "symlink": true
-            }
-        }
-    ],
     "autoload": {
         "psr-4": {
             "EchoFusion\\RouteManager\\": "src/"
@@ -41,7 +32,7 @@
     },
     "scripts": {
         "test": [
-            "@cs-fix","@phpunit"
+            "@cs-check","@analyze","@phpunit"
         ],
         "phpunit": "vendor/bin/phpunit",
         "phpunit-coverage": "vendor/bin/phpunit --coverage-text",
@@ -49,5 +40,6 @@
         "cs-check": "php-cs-fixer fix --dry-run --diff",
         "analyze": "psalm --show-info=false --no-cache --no-progress"
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
