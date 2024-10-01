@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EchoFusion\RouteManager;
 
-use EchoFusion\RouteManager\RouteMatch\RouteMatcherInterface;
+use EchoFusion\RouteManager\RouteMatcher\RouteMatcherInterface;
 use PHPUnit\Framework\Assert;
 use Psr\Container\ContainerInterface;
 

@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace EchoFusion\RouteManager\RouteMatch;
+namespace EchoFusion\RouteManager\RouteMatcher;
 
 use EchoFusion\RouteManager\RouteInterface;
+use EchoFusion\RouteManager\RouteMatch\RouteMatch;
+use EchoFusion\RouteManager\RouteMatch\RouteMatchInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class RouteMatcher implements RouteMatcherInterface
@@ -42,7 +44,6 @@ class RouteMatcher implements RouteMatcherInterface
 
             return (new RouteMatch())
                 ->setRoute($route)
-                ->setBody((array) $request->getParsedBody())
                 ->setParams($routeParams);
         }
 

@@ -7,8 +7,8 @@ namespace EchoFusion\RouteManager;
 use Closure;
 use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
 use EchoFusion\RouteManager\Exceptions\RouteNotFoundException;
-use EchoFusion\RouteManager\RouteMatch\RouteMatcherInterface;
 use EchoFusion\RouteManager\RouteMatch\RouteMatchInterface;
+use EchoFusion\RouteManager\RouteMatcher\RouteMatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Router implements RouterInterface
@@ -42,19 +42,14 @@ class Router implements RouterInterface
      */
     public function dispatch(ServerRequestInterface $request): RouteMatchInterface
     {
-        $routeMatch = null;
         foreach ($this->routes as $route) {
             $routeMatch = $this->routeMatcher->match($request, $route);
             if ($routeMatch instanceof RouteMatchInterface) {
-                break;
+                return $routeMatch;
             }
         }
 
-        if ($routeMatch === null) {
-            throw new RouteNotFoundException();
-        }
-
-        return $routeMatch;
+        throw new RouteNotFoundException();
     }
 
     public function get(string $name, string $path, array|Closure $action, ?array $constraints = []): self

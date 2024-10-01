@@ -24,5 +24,5 @@ interface RouteMatchInterface
     /**
      * @param non-empty-string $name
      */
-    public function getParam(string $name): ?string;
+    public function getParam(string $name): string|int|null;
 }

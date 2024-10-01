@@ -13,8 +13,6 @@ class RouteMatch implements RouteMatchInterface
 
     protected array $params = [];
 
-    protected array $body = [];
-
     public function setRoute(RouteInterface $route): self
     {
         $this->route = $route;
@@ -29,6 +27,10 @@ class RouteMatch implements RouteMatchInterface
 
     public function setParam(string $name, $value): self
     {
+        if (is_numeric($value)) {
+            $value = (int) $value;
+        }
+
         $this->params[$name] = $value;
 
         return $this;
@@ -46,24 +48,12 @@ class RouteMatch implements RouteMatchInterface
         return $this->params;
     }
 
-    public function getParam(string $name): ?string
+    public function getParam(string $name): string|int|null
     {
         if (array_key_exists($name, $this->params)) {
             return $this->params[$name];
         }
 
         return null;
-    }
-
-    public function getBody(): array
-    {
-        return $this->body;
-    }
-
-    public function setBody(array $body): self
-    {
-        $this->body = $body;
-
-        return $this;
     }
 }
