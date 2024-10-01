@@ -5,7 +5,7 @@ declare(strict_types=1);
 use EchoFusion\RouteManager\HttpMethod;
 use EchoFusion\RouteManager\RouteInterface;
 use EchoFusion\RouteManager\RouteMatch\RouteMatch;
-use EchoFusion\RouteManager\RouteMatch\RouteMatcher;
+use EchoFusion\RouteManager\RouteMatcher\RouteMatcher;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
@@ -106,5 +106,31 @@ class RouteMatcherTest extends TestCase
 
             $this->assertInstanceOf(RouteMatch::class, $result);
         }
+    }
+
+    public function testMatchReturnsRouteMatchWithConstraints(): void
+    {
+        $requestMock = $this->createMock(ServerRequestInterface::class);
+        $requestMock->method('getMethod')->willReturn(HttpMethod::GET->value);
+
+        $uriMock = $this->createMock(UriInterface::class);
+        $uriMock->method('getPath')->willReturn('/users/35/name/amir');
+        $requestMock->method('getUri')->willReturn($uriMock);
+
+        $routeMock = $this->createMock(RouteInterface::class);
+        $routeMock->method('getMethod')->willReturn(HttpMethod::GET);
+        $routeMock->method('getPath')->willReturn('/users/{id}/name/{name}');
+        $routeMock->method('getConstraints')->willReturn(
+            [
+                'id' => '[0-9]+',
+                'name' => '[a-zA-Z]+',
+            ]
+        );
+
+        $routeMatcher = new RouteMatcher();
+        $result = $routeMatcher->match($requestMock, $routeMock);
+
+        $this->assertInstanceOf(RouteMatch::class, $result);
+        $this->assertEquals(['id' => 35, 'name' => 'amir'], $result->getParams());
     }
 }

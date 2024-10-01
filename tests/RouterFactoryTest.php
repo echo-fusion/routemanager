@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use EchoFusion\RouteManager\RouteMatch\RouteMatcherInterface;
+use EchoFusion\RouteManager\RouteMatcher\RouteMatcherInterface;
 use EchoFusion\RouteManager\RouterFactory;
 use EchoFusion\RouteManager\RouterInterface;
 use PHPUnit\Framework\TestCase;

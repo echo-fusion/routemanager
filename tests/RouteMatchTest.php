@@ -32,8 +32,10 @@ class RouteMatchTest extends TestCase
         $routeMatch = new RouteMatch();
 
         $routeMatch->setParam('param1', 'value1');
-
         $this->assertSame('value1', $routeMatch->getParam('param1'));
+
+        $routeMatch->setParam('param2', '123');
+        $this->assertSame(123, $routeMatch->getParam('param2')); // Should be cast to int
     }
 
     public function testGetParamReturnsNullForNonExistentParam()
@@ -41,14 +43,5 @@ class RouteMatchTest extends TestCase
         $routeMatch = new RouteMatch();
 
         $this->assertNull($routeMatch->getParam('non_existent_param'));
-    }
-
-    public function testSetAndGetBody()
-    {
-        $routeMatch = new RouteMatch();
-
-        $routeMatch->setBody(['key' => 'value']);
-
-        $this->assertSame(['key' => 'value'], $routeMatch->getBody());
     }
 }
