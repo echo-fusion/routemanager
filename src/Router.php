@@ -99,18 +99,8 @@ class Router implements RouterInterface
             throw new DuplicateRouteException();
         }
 
-        $this->routes[$name] = $this->validateUniqueRouteName($route);
+        $this->routes[$name] = $route;
 
         return $this;
-    }
-
-    public function validateUniqueRouteName(RouteInterface $route): RouteInterface
-    {
-        $existenceRoute = $this->getRoute($route->getName());
-        if ($existenceRoute !== null) {
-            throw new DuplicateRouteException();
-        }
-
-        return $route;
     }
 }
