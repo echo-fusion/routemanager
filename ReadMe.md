@@ -57,13 +57,6 @@ $router->get(
         'slug' => '[a-z0-9\-]+',
     ]
 );
-
-// adding multiple route middleware as variadic params
-$router->post(
-    name: 'register', 
-    path: '/register', 
-    action: [AuthController::class, 'register']
-)->middlewares(GuestMiddleware::class);
 ```
 
 If request matched with any defined route, it will return instance of RouteMatchInterface.
@@ -73,10 +66,12 @@ try {
     $routeMatch = $router->dispatch($request);
 } catch (RouteNotFoundException $e) {
     // Handle route not found
+} catch (Throwable $exception) {
+    // Handle any other errors
 }
 ```
 
-Now, you can call controller with given method
+Now, you can call controller with given method: 
 
 ```php
 $action = $routeMatch->getRoute()->getAction();
