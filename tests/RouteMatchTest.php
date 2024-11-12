@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-use EchoFusion\RouteManager\RouteInterface;
-use EchoFusion\RouteManager\RouteMatch\RouteMatch;
+namespace EchoFusion\RouteManager\Tests;
+
+use EchoFusion\Contracts\RouteManager\RouteInterface;
+use EchoFusion\RouteManager\RouteMatch;
 use PHPUnit\Framework\TestCase;
 
 class RouteMatchTest extends TestCase
@@ -35,7 +37,7 @@ class RouteMatchTest extends TestCase
         $this->assertSame('value1', $routeMatch->getParam('param1'));
 
         $routeMatch->setParam('param2', '123');
-        $this->assertSame(123, $routeMatch->getParam('param2')); // Should be cast to int
+        $this->assertSame(123, $routeMatch->getParam('param2'));
     }
 
     public function testGetParamReturnsNullForNonExistentParam()

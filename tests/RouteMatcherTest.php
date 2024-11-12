@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-use EchoFusion\RouteManager\HttpMethod;
-use EchoFusion\RouteManager\RouteInterface;
-use EchoFusion\RouteManager\RouteMatch\RouteMatch;
-use EchoFusion\RouteManager\RouteMatcher\RouteMatcher;
+namespace EchoFusion\RouteManager\Tests;
+
+use EchoFusion\Contracts\RouteManager\RouteInterface;
+use EchoFusion\RouteManager\RouteMatch;
+use EchoFusion\RouteManager\RouteMatcher;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
@@ -15,10 +16,10 @@ class RouteMatcherTest extends TestCase
     public function testMatchReturnsNullForDifferentMethod(): void
     {
         $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getMethod')->willReturn(HttpMethod::POST->value);
+        $requestMock->method('getMethod')->willReturn('post');
 
         $routeMock = $this->createMock(RouteInterface::class);
-        $routeMock->method('getMethod')->willReturn(HttpMethod::GET);
+        $routeMock->method('getMethod')->willReturn('get');
 
         $routeMatcher = new RouteMatcher();
         $result = $routeMatcher->match($requestMock, $routeMock);
@@ -29,14 +30,14 @@ class RouteMatcherTest extends TestCase
     public function testMatchReturnsNullForDifferentPath(): void
     {
         $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getMethod')->willReturn(HttpMethod::GET->value);
+        $requestMock->method('getMethod')->willReturn('get');
 
         $uriMock = $this->createMock(UriInterface::class);
         $uriMock->method('getPath')->willReturn('/different/path');
         $requestMock->method('getUri')->willReturn($uriMock);
 
         $routeMock = $this->createMock(RouteInterface::class);
-        $routeMock->method('getMethod')->willReturn(HttpMethod::GET);
+        $routeMock->method('getMethod')->willReturn('get');
         $routeMock->method('getPath')->willReturn('/expected/path');
 
         $routeMatcher = new RouteMatcher();
@@ -48,14 +49,14 @@ class RouteMatcherTest extends TestCase
     public function testMatchReturnsRouteMatchOnSuccess(): void
     {
         $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getMethod')->willReturn(HttpMethod::GET->value);
+        $requestMock->method('getMethod')->willReturn('get');
 
         $uriMock = $this->createMock(UriInterface::class);
         $uriMock->method('getPath')->willReturn('/users/123');
         $requestMock->method('getUri')->willReturn($uriMock);
 
         $routeMock = $this->createMock(RouteInterface::class);
-        $routeMock->method('getMethod')->willReturn(HttpMethod::GET);
+        $routeMock->method('getMethod')->willReturn('get');
         $routeMock->method('getPath')->willReturn('/users/{id}');
         $routeMock->method('getConstraints')->willReturn(['id' => '\d+']);
 
@@ -69,14 +70,14 @@ class RouteMatcherTest extends TestCase
     public function testMatchReturnsRouteMatchWithDefaultConstraints(): void
     {
         $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getMethod')->willReturn(HttpMethod::GET->value);
+        $requestMock->method('getMethod')->willReturn('get');
 
         $uriMock = $this->createMock(UriInterface::class);
         $uriMock->method('getPath')->willReturn('/users/johndoe');
         $requestMock->method('getUri')->willReturn($uriMock);
 
         $routeMock = $this->createMock(RouteInterface::class);
-        $routeMock->method('getMethod')->willReturn(HttpMethod::GET);
+        $routeMock->method('getMethod')->willReturn('get');
         $routeMock->method('getPath')->willReturn('/users/{username}');
         $routeMock->method('getConstraints')->willReturn(null);
 
@@ -89,9 +90,9 @@ class RouteMatcherTest extends TestCase
 
     public function testMatchReturnsRouteMatchForAllHttpMethods(): void
     {
-        foreach (HttpMethod::cases() as $httpMethod) {
+        foreach (['get', 'post', 'put', 'patch', 'delete', 'options'] as $httpMethod) {
             $requestMock = $this->createMock(ServerRequestInterface::class);
-            $requestMock->method('getMethod')->willReturn($httpMethod->value);
+            $requestMock->method('getMethod')->willReturn($httpMethod);
 
             $uriMock = $this->createMock(UriInterface::class);
             $uriMock->method('getPath')->willReturn('/resource');
@@ -111,14 +112,14 @@ class RouteMatcherTest extends TestCase
     public function testMatchReturnsRouteMatchWithConstraints(): void
     {
         $requestMock = $this->createMock(ServerRequestInterface::class);
-        $requestMock->method('getMethod')->willReturn(HttpMethod::GET->value);
+        $requestMock->method('getMethod')->willReturn('get');
 
         $uriMock = $this->createMock(UriInterface::class);
         $uriMock->method('getPath')->willReturn('/users/35/name/amir');
         $requestMock->method('getUri')->willReturn($uriMock);
 
         $routeMock = $this->createMock(RouteInterface::class);
-        $routeMock->method('getMethod')->willReturn(HttpMethod::GET);
+        $routeMock->method('getMethod')->willReturn('get');
         $routeMock->method('getPath')->willReturn('/users/{id}/name/{name}');
         $routeMock->method('getConstraints')->willReturn(
             [
