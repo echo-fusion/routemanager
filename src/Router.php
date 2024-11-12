@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace EchoFusion\RouteManager;
 
 use Closure;
+use EchoFusion\Contracts\RouteManager\RouteMatcherInterface;
+use EchoFusion\Contracts\RouteManager\RouteMatchInterface;
+use EchoFusion\Contracts\RouteManager\RouterInterface;
 use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
 use EchoFusion\RouteManager\Exceptions\RouteNotFoundException;
-use EchoFusion\RouteManager\RouteMatch\RouteMatchInterface;
-use EchoFusion\RouteManager\RouteMatcher\RouteMatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Router implements RouterInterface
@@ -54,46 +55,48 @@ class Router implements RouterInterface
 
     public function get(string $name, string $path, array|Closure $action, ?array $constraints = []): self
     {
-        return $this->register(HttpMethod::GET, $name, $path, $action, $constraints);
+        return $this->register('get', $name, $path, $action, $constraints);
     }
 
     public function post(string $name, string $path, array|Closure $action, ?array $constraints = []): self
     {
-        return $this->register(HttpMethod::POST, $name, $path, $action, $constraints);
+        return $this->register('post', $name, $path, $action, $constraints);
     }
 
     public function put(string $name, string $path, array|Closure $action, ?array $constraints = []): self
     {
-        return $this->register(HttpMethod::PUT, $name, $path, $action, $constraints);
+        return $this->register('put', $name, $path, $action, $constraints);
     }
 
     public function patch(string $name, string $path, array|Closure $action, ?array $constraints = []): self
     {
-        return $this->register(HttpMethod::PATCH, $name, $path, $action, $constraints);
+        return $this->register('patch', $name, $path, $action, $constraints);
     }
 
     public function delete(string $name, string $path, array|Closure $action, ?array $constraints = []): self
     {
-        return $this->register(HttpMethod::DELETE, $name, $path, $action, $constraints);
+        return $this->register('delete', $name, $path, $action, $constraints);
     }
 
     public function options(string $name, string $path, array|Closure $action, ?array $constraints = []): self
     {
-        return $this->register(HttpMethod::OPTIONS, $name, $path, $action, $constraints);
+        return $this->register('options', $name, $path, $action, $constraints);
     }
 
     private function register(
-        HttpMethod $method,
+        string $method,
         string $name,
         string $path,
         array|Closure $action,
-        ?array $constraints = []
+        ?array $constraints = [],
+        ?array $middlewares = [],
     ): self {
         $route = (new Route($path))
             ->setName($name)
             ->setMethod($method)
             ->setAction($action)
-            ->setConstraints($constraints);
+            ->setConstraints($constraints)
+            ->setMiddlewares(...$middlewares);
 
         if ($this->getRoute($route->getName()) !== null) {
             throw new DuplicateRouteException();
@@ -102,5 +105,19 @@ class Router implements RouterInterface
         $this->routes[$name] = $route;
 
         return $this;
+    }
+
+    public function fromArray(array $routes): void
+    {
+        foreach ($routes as $name => $route) {
+            $this->register(
+                $route['method'],
+                $name,
+                $route['path'],
+                $route['action'],
+                $route['constraints'],
+                $route['middlewares']
+            );
+        }
     }
 }
