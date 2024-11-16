@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-use EchoFusion\RouteManager\Exceptions\RouteMiddlewareNotFoundException;
-use EchoFusion\RouteManager\HttpMethod;
+namespace EchoFusion\RouteManager\Tests;
+
+use Closure;
 use EchoFusion\RouteManager\Route;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class RouteTest extends TestCase
 {
@@ -18,9 +20,9 @@ class RouteTest extends TestCase
     public function testSetAndGetMethod(): void
     {
         $route = new Route('/test');
-        $route->setMethod(HttpMethod::GET);
+        $route->setMethod('get');
 
-        $this->assertSame(HttpMethod::GET, $route->getMethod());
+        $this->assertSame('get', $route->getMethod());
     }
 
     public function testSetAndGetName(): void
@@ -55,9 +57,6 @@ class RouteTest extends TestCase
         $existingMiddleware = FakeMiddleware::class;
         $route->setMiddlewares($existingMiddleware);
         $this->assertSame([$existingMiddleware], $route->getMiddlewares());
-
-        $this->expectException(RouteMiddlewareNotFoundException::class);
-        $route->setMiddlewares('NonExistentMiddlewareClass');
     }
 
     public function testSetAndGetConstraints(): void

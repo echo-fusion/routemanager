@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace EchoFusion\RouteManager;
 
 use Closure;
-use EchoFusion\RouteManager\Exceptions\RouteMiddlewareNotFoundException;
-use function sprintf;
+use EchoFusion\Contracts\RouteManager\RouteInterface;
 
 class Route implements RouteInterface
 {
-    protected HttpMethod $method;
+    protected string $method;
 
     protected string $name;
 
@@ -34,12 +33,12 @@ class Route implements RouteInterface
         $this->path = $path;
     }
 
-    public function getMethod(): HttpMethod
+    public function getMethod(): string
     {
         return $this->method;
     }
 
-    public function setMethod(HttpMethod $method): self
+    public function setMethod(string $method): self
     {
         $this->method = $method;
 
@@ -78,11 +77,6 @@ class Route implements RouteInterface
     public function setMiddlewares(string ...$middlewares): self
     {
         foreach ($middlewares as $middleware) {
-            if (!class_exists($middleware)) {
-                throw new RouteMiddlewareNotFoundException(
-                    sprintf('Middleware %s doesnt exist!', $middleware)
-                );
-            }
             $this->middlewares[] = $middleware;
         }
 

@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace EchoFusion\RouteManager\RouteMatch;
+namespace EchoFusion\RouteManager;
 
-use EchoFusion\RouteManager\RouteInterface;
+use EchoFusion\Contracts\RouteManager\RouteInterface;
+use EchoFusion\Contracts\RouteManager\RouteMatchInterface;
 use function array_key_exists;
 
 class RouteMatch implements RouteMatchInterface

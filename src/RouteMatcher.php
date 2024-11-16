@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace EchoFusion\RouteManager\RouteMatcher;
+namespace EchoFusion\RouteManager;
 
-use EchoFusion\RouteManager\RouteInterface;
-use EchoFusion\RouteManager\RouteMatch\RouteMatch;
-use EchoFusion\RouteManager\RouteMatch\RouteMatchInterface;
+use EchoFusion\Contracts\RouteManager\RouteInterface;
+use EchoFusion\Contracts\RouteManager\RouteMatcherInterface;
+use EchoFusion\Contracts\RouteManager\RouteMatchInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class RouteMatcher implements RouteMatcherInterface
@@ -18,7 +18,7 @@ class RouteMatcher implements RouteMatcherInterface
 
         $path = $route->getPath();
 
-        if (mb_strtolower($route->getMethod()->value) !== mb_strtolower($requestMethod)) {
+        if (mb_strtolower($route->getMethod()) !== mb_strtolower($requestMethod)) {
             return null;
         }
 

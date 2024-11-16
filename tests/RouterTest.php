@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+namespace EchoFusion\RouteManager\Tests;
+
+use EchoFusion\Contracts\RouteManager\RouteMatcherInterface;
+use EchoFusion\Contracts\RouteManager\RouteMatchInterface;
+use EchoFusion\Contracts\RouteManager\RouterInterface;
 use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
 use EchoFusion\RouteManager\Exceptions\RouteNotFoundException;
-use EchoFusion\RouteManager\HttpMethod;
 use EchoFusion\RouteManager\Route;
-use EchoFusion\RouteManager\RouteMatch\RouteMatchInterface;
-use EchoFusion\RouteManager\RouteMatcher\RouteMatcherInterface;
 use EchoFusion\RouteManager\Router;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -16,7 +18,7 @@ use Psr\Http\Message\UriInterface;
 
 class RouterTest extends TestCase
 {
-    private Router $router;
+    private RouterInterface $router;
 
     private MockObject|RouteMatcherInterface $routeMatcher;
 
@@ -37,13 +39,13 @@ class RouterTest extends TestCase
     {
         $route = (new Route('/test'))
             ->setName('test')
-            ->setMethod(HttpMethod::GET)
+            ->setMethod('get')
             ->setAction(fn () => 'test action');
 
         $this->router->get($route->getName(), $route->getPath(), $route->getAction());
 
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getMethod')->willReturn(HttpMethod::GET->value);
+        $request->method('getMethod')->willReturn('get');
         $uri = $this->createMock(UriInterface::class);
         $request->method('getUri')->willReturn($uri);
 
@@ -101,13 +103,13 @@ class RouterTest extends TestCase
 
         $route = (new Route('/method'))
             ->setName('methodRoute')
-            ->setMethod(HttpMethod::POST)
+            ->setMethod('post')
             ->setAction(fn () => 'Method action');
 
         $this->router->post($route->getName(), $route->getPath(), $route->getAction());
 
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getMethod')->willReturn(HttpMethod::GET->value);
+        $request->method('getMethod')->willReturn('get');
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/method');
         $request->method('getUri')->willReturn($uri);
@@ -119,13 +121,13 @@ class RouterTest extends TestCase
     {
         $route = (new Route('/user/{id}'))
             ->setName('userRoute')
-            ->setMethod(HttpMethod::GET)
+            ->setMethod('get')
             ->setAction(fn () => 'User action');
 
         $this->router->get($route->getName(), $route->getPath(), $route->getAction());
 
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getMethod')->willReturn(HttpMethod::GET->value);
+        $request->method('getMethod')->willReturn('get');
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/user/123');
         $request->method('getUri')->willReturn($uri);
@@ -143,13 +145,13 @@ class RouterTest extends TestCase
     {
         $route = (new Route('/options'))
             ->setName('optionsRoute')
-            ->setMethod(HttpMethod::OPTIONS)
+            ->setMethod('options')
             ->setAction(fn () => 'Options action');
 
         $this->router->options($route->getName(), $route->getPath(), $route->getAction());
 
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getMethod')->willReturn(HttpMethod::OPTIONS->value);
+        $request->method('getMethod')->willReturn('options');
         $uri = $this->createMock(UriInterface::class);
         $request->method('getUri')->willReturn($uri);
         $uri->method('getPath')->willReturn('/options');
@@ -167,13 +169,13 @@ class RouterTest extends TestCase
     {
         $route = (new Route('/delete'))
             ->setName('deleteRoute')
-            ->setMethod(HttpMethod::DELETE)
+            ->setMethod('delete')
             ->setAction(fn () => 'Delete action');
 
         $this->router->delete($route->getName(), $route->getPath(), $route->getAction());
 
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getMethod')->willReturn(HttpMethod::DELETE->value);
+        $request->method('getMethod')->willReturn('delete');
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/delete');
         $request->method('getUri')->willReturn($uri);
@@ -191,13 +193,13 @@ class RouterTest extends TestCase
     {
         $route = (new Route('/put'))
             ->setName('putRoute')
-            ->setMethod(HttpMethod::PUT)
+            ->setMethod('put')
             ->setAction(fn () => 'Put action');
 
         $this->router->put($route->getName(), $route->getPath(), $route->getAction());
 
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getMethod')->willReturn(HttpMethod::PUT->value);
+        $request->method('getMethod')->willReturn('put');
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/put');
         $request->method('getUri')->willReturn($uri);
@@ -215,13 +217,13 @@ class RouterTest extends TestCase
     {
         $route = (new Route('/patch'))
             ->setName('patchRoute')
-            ->setMethod(HttpMethod::PATCH)
+            ->setMethod('patch')
             ->setAction(fn () => 'Patch action');
 
         $this->router->patch($route->getName(), $route->getPath(), $route->getAction());
 
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getMethod')->willReturn(HttpMethod::PATCH->value);
+        $request->method('getMethod')->willReturn('patch');
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/patch');
         $request->method('getUri')->willReturn($uri);
@@ -233,5 +235,28 @@ class RouterTest extends TestCase
 
         $routeMatch = $this->router->dispatch($request);
         $this->assertInstanceOf(RouteMatchInterface::class, $routeMatch);
+    }
+
+    public function testFromArrayRegistersRoutesCorrectly(): void
+    {
+        $routes = [
+            'health_check' => [
+                'method' => 'GET',
+                'path' => '/health-check',
+                'action' => fn () => 'healthy',
+                'constraints' => [],
+                'middlewares' => [],
+            ],
+        ];
+
+        $this->router->fromArray($routes);
+
+        $registeredRoutes = $this->router->getRoutes();
+        $this->assertArrayHasKey('health_check', $registeredRoutes);
+        $this->assertEquals('GET', $registeredRoutes['health_check']->getMethod());
+        $this->assertEquals('/health-check', $registeredRoutes['health_check']->getPath());
+        $this->assertIsCallable($registeredRoutes['health_check']->getAction());
+        $this->assertEquals([], $registeredRoutes['health_check']->getConstraints());
+        $this->assertEquals([], $registeredRoutes['health_check']->getMiddlewares());
     }
 }
