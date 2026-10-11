@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EchoFusion\RouteManager\Providers;
 
+use EchoFusion\Contracts\RouteManager\RouteLoaderInterface;
 use EchoFusion\Contracts\RouteManager\RouteMatcherInterface;
 use EchoFusion\Contracts\RouteManager\RouterInterface;
 use EchoFusion\Contracts\ServiceManager\SettableContainerInterface;
@@ -11,8 +12,10 @@ use EchoFusion\Contracts\ServiceProvider\ServiceProviderInterface;
 use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
 use EchoFusion\RouteManager\RouteMatcher;
 use EchoFusion\RouteManager\Router;
+use LogicException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use function sprintf;
 
 class RouteManagerProvider implements ServiceProviderInterface
 {
@@ -53,8 +56,11 @@ class RouteManagerProvider implements ServiceProviderInterface
             $config = require __DIR__ . '/../../config/routemanager.config.php';
         }
 
-        /** @var RouterInterface $router */
         $router = $container->get(RouterInterface::class);
+
+        if (!$router instanceof RouteLoaderInterface) {
+            throw new LogicException(sprintf('The router must implement %s to load routes from configuration.', RouteLoaderInterface::class));
+        }
 
         $router->fromArray($config);
 

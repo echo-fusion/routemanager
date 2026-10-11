@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EchoFusion\RouteManager;
 
 use Closure;
+use EchoFusion\Contracts\RouteManager\RouteLoaderInterface;
 use EchoFusion\Contracts\RouteManager\RouteMatcherInterface;
 use EchoFusion\Contracts\RouteManager\RouteMatchInterface;
 use EchoFusion\Contracts\RouteManager\RouterInterface;
@@ -12,7 +13,7 @@ use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
 use EchoFusion\RouteManager\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ServerRequestInterface;
 
-class Router implements RouterInterface
+class Router implements RouterInterface, RouteLoaderInterface
 {
     /**
      * @var array<Route>

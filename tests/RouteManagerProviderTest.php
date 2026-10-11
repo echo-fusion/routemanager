@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EchoFusion\RouteManager\Tests;
 
 use Closure;
+use EchoFusion\Contracts\RouteManager\RouteLoaderInterface;
 use EchoFusion\Contracts\RouteManager\RouteMatcherInterface;
 use EchoFusion\Contracts\RouteManager\RouterInterface;
 use EchoFusion\Contracts\ServiceManager\SettableContainerInterface;
@@ -12,9 +13,14 @@ use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
 use EchoFusion\RouteManager\Providers\RouteManagerProvider;
 use EchoFusion\RouteManager\RouteMatcher;
 use EchoFusion\RouteManager\Router;
+use LogicException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
+
+interface LoadableRouter extends RouterInterface, RouteLoaderInterface
+{
+}
 
 class RouteManagerProviderTest extends TestCase
 {
@@ -62,7 +68,7 @@ class RouteManagerProviderTest extends TestCase
             ],
         ];
 
-        $routerMock = $this->createMock(RouterInterface::class);
+        $routerMock = $this->createMock(LoadableRouter::class);
         $routerMock->expects($this->once())
             ->method('fromArray')
             ->with($config);
@@ -91,7 +97,7 @@ class RouteManagerProviderTest extends TestCase
             ],
         ];
 
-        $routerMock = $this->createMock(RouterInterface::class);
+        $routerMock = $this->createMock(LoadableRouter::class);
 
         $routerMock->expects($this->once())
             ->method('fromArray')
@@ -114,7 +120,7 @@ class RouteManagerProviderTest extends TestCase
     {
         $this->expectException(DuplicateRouteException::class);
 
-        $routerMock = $this->createMock(RouterInterface::class);
+        $routerMock = $this->createMock(LoadableRouter::class);
         $routerMock->method('fromArray')
             ->willThrowException(new DuplicateRouteException('Route already exists'));
 
@@ -134,5 +140,17 @@ class RouteManagerProviderTest extends TestCase
             ->willThrowException($this->createMock(ContainerExceptionInterface::class));
 
         $this->provider->boot($this->container);
+    }
+
+    public function testBootThrowsWhenRouterCannotLoadRoutes(): void
+    {
+        $this->expectException(LogicException::class);
+
+        $this->container->method('get')
+            ->willReturnMap([
+                [RouterInterface::class, $this->createMock(RouterInterface::class)],
+            ]);
+
+        $this->provider->boot($this->container, ['some_route' => []]);
     }
 }
