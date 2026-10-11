@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a628b91d5a99c9a0f553c002dd3d7cd4",
+    "content-hash": "b8192157b7571ed0472043ec64a40f7c",
     "packages": [
         {
             "name": "echo-fusion/contracts",
-            "version": "v1.1.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/echo-fusion/contracts.git",
-                "reference": "08685e69c1fb99f298c4a7d4308d6ea7ed943dae"
+                "reference": "231428972b6f700428ad63e7ed4c16b22d6a313a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/echo-fusion/contracts/zipball/08685e69c1fb99f298c4a7d4308d6ea7ed943dae",
-                "reference": "08685e69c1fb99f298c4a7d4308d6ea7ed943dae",
+                "url": "https://api.github.com/repos/echo-fusion/contracts/zipball/231428972b6f700428ad63e7ed4c16b22d6a313a",
+                "reference": "231428972b6f700428ad63e7ed4c16b22d6a313a",
                 "shasum": ""
             },
             "require": {
@@ -53,9 +53,9 @@
             ],
             "support": {
                 "issues": "https://github.com/echo-fusion/contracts/issues",
-                "source": "https://github.com/echo-fusion/contracts/tree/v1.1.0"
+                "source": "https://github.com/echo-fusion/contracts/tree/v1.2.1"
             },
-            "time": "2024-11-07T12:03:24+00:00"
+            "time": "2026-10-11T21:11:50+00:00"
         },
         {
             "name": "psr/container",
