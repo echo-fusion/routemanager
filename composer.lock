@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b8192157b7571ed0472043ec64a40f7c",
+    "content-hash": "1d59f7a57a9f37301eef786e2bbee14b",
     "packages": [
         {
             "name": "echo-fusion/contracts",
