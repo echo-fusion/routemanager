@@ -10,8 +10,10 @@ use EchoFusion\Contracts\RouteManager\RouteMatcherInterface;
 use EchoFusion\Contracts\RouteManager\RouteMatchInterface;
 use EchoFusion\Contracts\RouteManager\RouterInterface;
 use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
+use EchoFusion\RouteManager\Exceptions\InvalidRouteException;
 use EchoFusion\RouteManager\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ServerRequestInterface;
+use function sprintf;
 
 class Router implements RouterInterface, RouteLoaderInterface
 {
@@ -51,7 +53,7 @@ class Router implements RouterInterface, RouteLoaderInterface
             }
         }
 
-        throw new RouteNotFoundException();
+        throw RouteNotFoundException::forRequest($request->getMethod(), $request->getUri()->getPath());
     }
 
     public function get(string $name, string $path, array|Closure $action, ?array $constraints = []): self
@@ -100,8 +102,11 @@ class Router implements RouterInterface, RouteLoaderInterface
             ->setMiddlewares(...$middlewares);
 
         if ($this->getRoute($route->getName()) !== null) {
-            throw new DuplicateRouteException();
+            throw DuplicateRouteException::forName($route->getName());
         }
+
+        // fail now, with the route's name, instead of on the first request
+        RoutePattern::compile($path, $constraints);
 
         $this->routes[$name] = $route;
 
@@ -111,13 +116,19 @@ class Router implements RouterInterface, RouteLoaderInterface
     public function fromArray(array $routes): void
     {
         foreach ($routes as $name => $route) {
+            foreach (['method', 'path', 'action'] as $required) {
+                if (!isset($route[$required])) {
+                    throw new InvalidRouteException(sprintf('The route "%s" needs a "%s".', $name, $required));
+                }
+            }
+
             $this->register(
                 $route['method'],
-                $name,
+                (string) $name,
                 $route['path'],
                 $route['action'],
-                $route['constraints'],
-                $route['middlewares']
+                $route['constraints'] ?? [],
+                $route['middlewares'] ?? [],
             );
         }
     }

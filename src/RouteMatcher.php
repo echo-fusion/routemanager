@@ -8,45 +8,47 @@ use EchoFusion\Contracts\RouteManager\RouteInterface;
 use EchoFusion\Contracts\RouteManager\RouteMatcherInterface;
 use EchoFusion\Contracts\RouteManager\RouteMatchInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use const ARRAY_FILTER_USE_KEY;
+use function array_filter;
+use function is_string;
+use function json_encode;
+use function preg_match;
+use function strcasecmp;
 
 class RouteMatcher implements RouteMatcherInterface
 {
+    /**
+     * Compiled regexes by path and constraints, so a route is compiled once instead of on every request.
+     *
+     * @var array<string, string>
+     */
+    private array $compiled = [];
+
     public function match(ServerRequestInterface $request, RouteInterface $route): ?RouteMatchInterface
     {
-        $requestMethod = $request->getMethod();
-        $requestedPath = $request->getUri()->getPath();
-
-        $path = $route->getPath();
-
-        if (mb_strtolower($route->getMethod()) !== mb_strtolower($requestMethod)) {
+        if (strcasecmp($route->getMethod(), $request->getMethod()) !== 0) {
             return null;
         }
 
-        $constraints = $route->getConstraints() ?? [];
+        $regex = $this->regex($route);
 
-        $routeRegex = preg_replace_callback('/{([^}]+)}/', function ($matches) use ($constraints) {
-            $paramName = $matches[1];
-
-            return isset($constraints[$paramName]) ? '(' . $constraints[$paramName] . ')' : '([a-zA-Z0-9_-]+)';
-        }, $path);
-
-        $routeRegex = '@^' . $routeRegex . '$@';
-
-        if (preg_match($routeRegex, $requestedPath, $matches)) {
-            array_shift($matches);
-
-            $routeParamsNames = [];
-            if (preg_match_all('/{(\w+)(:[^}]+)?}/', $path, $paramMatches)) {
-                $routeParamsNames = $paramMatches[1];
-            }
-
-            $routeParams = array_combine($routeParamsNames, $matches);
-
-            return (new RouteMatch())
-                ->setRoute($route)
-                ->setParams($routeParams);
+        if (preg_match($regex, $request->getUri()->getPath(), $matches) !== 1) {
+            return null;
         }
 
-        return null;
+        // named groups only: the numeric entries are duplicates
+        $params = array_filter($matches, static fn ($key): bool => is_string($key), ARRAY_FILTER_USE_KEY);
+
+        return (new RouteMatch())
+            ->setRoute($route)
+            ->setParams($params);
+    }
+
+    private function regex(RouteInterface $route): string
+    {
+        $constraints = $route->getConstraints();
+        $key = $route->getPath() . "\0" . json_encode($constraints);
+
+        return $this->compiled[$key] ??= RoutePattern::compile($route->getPath(), $constraints)[0];
     }
 }
