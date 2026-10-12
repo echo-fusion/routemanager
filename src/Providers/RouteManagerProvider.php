@@ -38,13 +38,6 @@ class RouteManagerProvider implements ServiceProviderInterface
     /**
      * Boot the services by given config
      *
-     * @param array<string, array{
-     *     method: non-empty-string,
-     *     path: non-empty-string,
-     *     action: callable|array<string,non-empty-string>,
-     *     constraints?: array<string, mixed>,
-     *     middlewares?: array<string>
-     * }> $routes
      * @throws DuplicateRouteException
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
