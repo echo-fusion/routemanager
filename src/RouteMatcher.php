@@ -15,7 +15,7 @@ use function json_encode;
 use function preg_match;
 use function strcasecmp;
 
-class RouteMatcher implements RouteMatcherInterface
+class RouteMatcher implements RouteMatcherInterface, RoutePathMatcherInterface
 {
     /**
      * Compiled regexes by path and constraints, so a route is compiled once instead of on every request.
@@ -26,13 +26,11 @@ class RouteMatcher implements RouteMatcherInterface
 
     public function match(ServerRequestInterface $request, RouteInterface $route): ?RouteMatchInterface
     {
-        if (strcasecmp($route->getMethod(), $request->getMethod()) !== 0) {
+        if (!$this->methodMatches($request, $route)) {
             return null;
         }
 
-        $regex = $this->regex($route);
-
-        if (preg_match($regex, $request->getUri()->getPath(), $matches) !== 1) {
+        if (preg_match($this->regex($route), $request->getUri()->getPath(), $matches) !== 1) {
             return null;
         }
 
@@ -42,6 +40,22 @@ class RouteMatcher implements RouteMatcherInterface
         return (new RouteMatch())
             ->setRoute($route)
             ->setParams($params);
+    }
+
+    public function matchesPath(ServerRequestInterface $request, RouteInterface $route): bool
+    {
+        return preg_match($this->regex($route), $request->getUri()->getPath()) === 1;
+    }
+
+    /**
+     * Methods are compared case-insensitively, and a HEAD request is served by the GET route of the same path.
+     */
+    private function methodMatches(ServerRequestInterface $request, RouteInterface $route): bool
+    {
+        $requested = $request->getMethod();
+
+        return strcasecmp($route->getMethod(), $requested) === 0
+            || (strcasecmp($requested, 'HEAD') === 0 && strcasecmp($route->getMethod(), 'GET') === 0);
     }
 
     private function regex(RouteInterface $route): string

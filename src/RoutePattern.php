@@ -10,6 +10,7 @@ use function preg_match;
 use function preg_quote;
 use function preg_replace;
 use function sprintf;
+use function str_ends_with;
 use function strlen;
 use function strpos;
 use function substr;
@@ -20,6 +21,7 @@ use function substr;
  * - Literal text is quoted, so `/file.json` only matches a real dot.
  * - A placeholder is `{name}` or `{name:regex}`; a `constraints` entry for the name wins over an inline regex,
  *   and a placeholder without either matches `[a-zA-Z0-9_-]+`.
+ * - A single trailing slash on the request path is tolerated (`/about` also matches `/about/`).
  * - Placeholders become named groups, so a constraint may contain its own groups without shifting the parameters.
  *
  * @internal
@@ -87,6 +89,11 @@ final class RoutePattern
         }
 
         $regex .= preg_quote(substr($path, $literalStart), '#');
+
+        // tolerate one trailing slash, except for the root path and paths that already end with one
+        if ($path !== '/' && !str_ends_with($path, '/')) {
+            $regex .= '/?';
+        }
 
         $compiled = sprintf('#^%s$#D', $regex);
         if (@preg_match($compiled, '') === false) {

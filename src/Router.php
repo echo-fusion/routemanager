@@ -11,9 +11,12 @@ use EchoFusion\Contracts\RouteManager\RouteMatchInterface;
 use EchoFusion\Contracts\RouteManager\RouterInterface;
 use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
 use EchoFusion\RouteManager\Exceptions\InvalidRouteException;
+use EchoFusion\RouteManager\Exceptions\MethodNotAllowedException;
 use EchoFusion\RouteManager\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ServerRequestInterface;
+use function array_values;
 use function sprintf;
+use function strtoupper;
 
 class Router implements RouterInterface, RouteLoaderInterface
 {
@@ -53,7 +56,37 @@ class Router implements RouterInterface, RouteLoaderInterface
             }
         }
 
+        $allowed = $this->allowedMethods($request);
+        if ($allowed !== []) {
+            throw MethodNotAllowedException::forMethod($request->getMethod(), $request->getUri()->getPath(), $allowed);
+        }
+
         throw RouteNotFoundException::forRequest($request->getMethod(), $request->getUri()->getPath());
+    }
+
+    /**
+     * The methods of the routes whose path matches the request (needs a matcher that can match paths alone).
+     *
+     * @return list<string>
+     */
+    private function allowedMethods(ServerRequestInterface $request): array
+    {
+        if (!$this->routeMatcher instanceof RoutePathMatcherInterface) {
+            return [];
+        }
+
+        $methods = [];
+        foreach ($this->routes as $route) {
+            if ($this->routeMatcher->matchesPath($request, $route)) {
+                $method = strtoupper($route->getMethod());
+                $methods[$method] = $method;
+                if ($method === 'GET') {
+                    $methods['HEAD'] = 'HEAD';
+                }
+            }
+        }
+
+        return array_values($methods);
     }
 
     public function get(string $name, string $path, array|Closure $action, ?array $constraints = []): self
