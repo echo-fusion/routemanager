@@ -31,9 +31,13 @@ final class RoutePatternTest extends TestCase
     public function testStaticPaths(): void
     {
         $this->assertSame([], $this->match('/about', null, '/about'));
-        $this->assertNull($this->match('/about', null, '/about/'));
+        $this->assertSame([], $this->match('/about', null, '/about/'), 'one trailing slash is tolerated');
+        $this->assertNull($this->match('/about', null, '/about//'));
         $this->assertNull($this->match('/about', null, '/about-us'));
         $this->assertSame([], $this->match('/', null, '/'));
+        $this->assertNull($this->match('/', null, '//'));
+        $this->assertSame([], $this->match('/docs/', null, '/docs/'), 'a path that ends with a slash keeps it');
+        $this->assertNull($this->match('/docs/', null, '/docs'));
     }
 
     public function testLiteralTextIsQuoted(): void

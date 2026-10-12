@@ -6,6 +6,7 @@ namespace EchoFusion\RouteManager\Tests;
 
 use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
 use EchoFusion\RouteManager\Exceptions\InvalidRouteException;
+use EchoFusion\RouteManager\Exceptions\MethodNotAllowedException;
 use EchoFusion\RouteManager\Exceptions\RouteNotFoundException;
 use EchoFusion\RouteManager\RouteMatcher;
 use EchoFusion\RouteManager\Router;
@@ -140,5 +141,76 @@ final class RoutingTest extends TestCase
             'no path' => [['method' => 'GET', 'action' => $action], 'path'],
             'no action' => [['method' => 'GET', 'path' => '/'], 'action'],
         ];
+    }
+
+    public function testAWrongMethodOnAnExistingPathIsA405WithTheAllowedMethods(): void
+    {
+        $router = $this->router();
+        $router->get('show', '/item/{id}', fn () => null);
+        $router->put('update', '/item/{id}', fn () => null);
+        $router->post('other', '/other', fn () => null);
+
+        try {
+            $router->dispatch($this->request('DELETE', '/item/5'));
+            $this->fail('Expected MethodNotAllowedException');
+        } catch (MethodNotAllowedException $e) {
+            $this->assertSame(['GET', 'HEAD', 'PUT'], $e->getAllowedMethods());
+            $this->assertSame('Method DELETE is not allowed for /item/5; allowed: GET, HEAD, PUT.', $e->getMessage());
+            $this->assertInstanceOf(RouteNotFoundException::class, $e, 'code that handles "not found" keeps working');
+        }
+    }
+
+    public function testAnUnknownPathIsStillA404(): void
+    {
+        $router = $this->router();
+        $router->get('home', '/', fn () => null);
+
+        try {
+            $router->dispatch($this->request('POST', '/nope'));
+            $this->fail('Expected RouteNotFoundException');
+        } catch (RouteNotFoundException $e) {
+            $this->assertNotInstanceOf(MethodNotAllowedException::class, $e);
+        }
+    }
+
+    public function testHeadRequestsAreServedByTheGetRoute(): void
+    {
+        $router = $this->router();
+        $router->get('home', '/home', fn () => null);
+        $router->post('save', '/save', fn () => null);
+
+        $this->assertSame('home', $router->dispatch($this->request('HEAD', '/home'))->getRoute()->getName());
+
+        $this->expectException(MethodNotAllowedException::class);
+        $router->dispatch($this->request('HEAD', '/save'));
+    }
+
+    public function testOneTrailingSlashIsTolerated(): void
+    {
+        $router = $this->router();
+        $router->get('about', '/about', fn () => null);
+        $router->get('post', '/post/{id}', fn () => null);
+
+        $this->assertSame('about', $router->dispatch($this->request('GET', '/about/'))->getRoute()->getName());
+        $this->assertSame(['id' => '7'], $router->dispatch($this->request('GET', '/post/7/'))->getParams());
+    }
+
+    public function testWithAMatcherThatCannotMatchPathsAloneItStaysA404(): void
+    {
+        $matcher = new class() implements \EchoFusion\Contracts\RouteManager\RouteMatcherInterface {
+            public function match(ServerRequestInterface $request, \EchoFusion\Contracts\RouteManager\RouteInterface $route): ?\EchoFusion\Contracts\RouteManager\RouteMatchInterface
+            {
+                return null;
+            }
+        };
+        $router = new Router($matcher);
+        $router->get('home', '/', fn () => null);
+
+        try {
+            $router->dispatch($this->request('POST', '/'));
+            $this->fail('Expected RouteNotFoundException');
+        } catch (RouteNotFoundException $e) {
+            $this->assertNotInstanceOf(MethodNotAllowedException::class, $e);
+        }
     }
 }

@@ -92,7 +92,19 @@ $router->get('year', '/archive/{year:\d{4}}', $action);                     // i
 * Everything outside the placeholders is literal: in `/file.json` the dot is a real dot.
 * Parameters are returned by name (`$routeMatch->getParams()`), even when a constraint has capturing groups of its own.
 * A path that cannot be compiled (unclosed `{`, duplicate or invalid parameter name, broken regex) throws `Exceptions\InvalidRouteException` **when the route is registered**, not on the first request.
-* Methods are compared case-insensitively. When nothing matches, `dispatch()` throws `RouteNotFoundException` whose message says what was requested.
+* Methods are compared case-insensitively. A `HEAD` request is served by the `GET` route of the same path.
+* One trailing slash on the request is tolerated: a route `/about` also matches `/about/`. A route defined with a trailing slash (`/docs/`) keeps it.
+* When nothing matches, `dispatch()` throws `RouteNotFoundException` whose message says what was requested. When the **path** exists but not for the request's method, it throws `MethodNotAllowedException` (a subclass, so existing `catch (RouteNotFoundException)` code keeps working). Use it to answer `405` with an `Allow` header:
+
+```php
+try {
+    $match = $router->dispatch($request);
+} catch (MethodNotAllowedException $e) {
+    return $response->withStatus(405)->withHeader('Allow', implode(', ', $e->getAllowedMethods()));
+} catch (RouteNotFoundException) {
+    return $response->withStatus(404);
+}
+```
 
 ## Using Provider
 
