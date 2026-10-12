@@ -7,42 +7,25 @@ namespace EchoFusion\RouteManager;
 use Closure;
 use EchoFusion\Contracts\RouteManager\RouteInterface;
 
-class Route implements RouteInterface
+/**
+ * An immutable route definition. `with*()` methods return a changed copy.
+ */
+final class Route implements RouteInterface
 {
-    protected string $method;
-
-    protected string $name;
-
-    protected string $path;
-
-    protected array|Closure $action;
-
-    protected ?array $middlewares = [];
-
-    protected ?array $constraints = [];
-
-    protected array $arguments = [];
-
-    public function getArguments(): array
-    {
-        return $this->arguments;
-    }
-
-    public function __construct(string $path)
-    {
-        $this->path = $path;
-    }
-
-    public function getMethod(): string
-    {
-        return $this->method;
-    }
-
-    public function setMethod(string $method): self
-    {
-        $this->method = $method;
-
-        return $this;
+    /**
+     * @param non-empty-string $name
+     * @param array<array-key, mixed>|Closure $action
+     * @param array<string, non-empty-string>|null $constraints parameter name => regex
+     * @param list<class-string> $middlewares
+     */
+    public function __construct(
+        private readonly string $name,
+        private readonly string $method,
+        private readonly string $path,
+        private readonly array|Closure $action,
+        private readonly ?array $constraints = [],
+        private readonly array $middlewares = [],
+    ) {
     }
 
     public function getName(): string
@@ -50,11 +33,14 @@ class Route implements RouteInterface
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function getMethod(): string
     {
-        $this->name = $name;
+        return $this->method;
+    }
 
-        return $this;
+    public function getPath(): string
+    {
+        return $this->path;
     }
 
     public function getAction(): array|Closure
@@ -62,11 +48,9 @@ class Route implements RouteInterface
         return $this->action;
     }
 
-    public function setAction(array|Closure $action): self
+    public function getConstraints(): ?array
     {
-        $this->action = $action;
-
-        return $this;
+        return $this->constraints;
     }
 
     public function getMiddlewares(): array
@@ -74,29 +58,20 @@ class Route implements RouteInterface
         return $this->middlewares;
     }
 
-    public function setMiddlewares(string ...$middlewares): self
+    /**
+     * A copy of the route that also runs the given middleware (after the ones it already has).
+     *
+     * @param class-string ...$middlewares
+     */
+    public function withMiddlewares(string ...$middlewares): self
     {
-        foreach ($middlewares as $middleware) {
-            $this->middlewares[] = $middleware;
-        }
-
-        return $this;
-    }
-
-    public function getConstraints(): ?array
-    {
-        return $this->constraints;
-    }
-
-    public function setConstraints(?array $constraints): self
-    {
-        $this->constraints = $constraints;
-
-        return $this;
-    }
-
-    public function getPath(): string
-    {
-        return $this->path;
+        return new self(
+            $this->name,
+            $this->method,
+            $this->path,
+            $this->action,
+            $this->constraints,
+            [...$this->middlewares, ...$middlewares],
+        );
     }
 }

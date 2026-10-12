@@ -8,6 +8,7 @@ use Closure;
 use EchoFusion\Contracts\RouteManager\RouteLoaderInterface;
 use EchoFusion\Contracts\RouteManager\RouteMatcherInterface;
 use EchoFusion\Contracts\RouteManager\RouteMatchInterface;
+use EchoFusion\Contracts\RouteManager\RouteRegistrarInterface;
 use EchoFusion\Contracts\RouteManager\RouterInterface;
 use EchoFusion\RouteManager\Exceptions\DuplicateRouteException;
 use EchoFusion\RouteManager\Exceptions\InvalidRouteException;
@@ -18,7 +19,7 @@ use function array_values;
 use function sprintf;
 use function strtoupper;
 
-class Router implements RouterInterface, RouteLoaderInterface
+class Router implements RouterInterface, RouteRegistrarInterface, RouteLoaderInterface
 {
     /**
      * @var array<Route>
@@ -127,12 +128,7 @@ class Router implements RouterInterface, RouteLoaderInterface
         ?array $constraints = [],
         ?array $middlewares = [],
     ): self {
-        $route = (new Route($path))
-            ->setName($name)
-            ->setMethod($method)
-            ->setAction($action)
-            ->setConstraints($constraints)
-            ->setMiddlewares(...$middlewares);
+        $route = new Route($name, $method, $path, $action, $constraints, $middlewares ?? []);
 
         if ($this->getRoute($route->getName()) !== null) {
             throw DuplicateRouteException::forName($route->getName());

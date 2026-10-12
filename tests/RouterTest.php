@@ -37,10 +37,7 @@ class RouterTest extends TestCase
 
     public function testDispatchReturnsRouteMatch(): void
     {
-        $route = (new Route('/test'))
-            ->setName('test')
-            ->setMethod('get')
-            ->setAction(fn () => 'test action');
+        $route = new Route('test', 'get', '/test', fn () => 'test action');
 
         $this->router->get($route->getName(), $route->getPath(), $route->getAction());
 
@@ -101,10 +98,7 @@ class RouterTest extends TestCase
     {
         $this->expectException(RouteNotFoundException::class);
 
-        $route = (new Route('/method'))
-            ->setName('methodRoute')
-            ->setMethod('post')
-            ->setAction(fn () => 'Method action');
+        $route = new Route('methodRoute', 'post', '/method', fn () => 'Method action');
 
         $this->router->post($route->getName(), $route->getPath(), $route->getAction());
 
@@ -119,10 +113,7 @@ class RouterTest extends TestCase
 
     public function testDynamicRouteParameters(): void
     {
-        $route = (new Route('/user/{id}'))
-            ->setName('userRoute')
-            ->setMethod('get')
-            ->setAction(fn () => 'User action');
+        $route = new Route('userRoute', 'get', '/user/{id}', fn () => 'User action');
 
         $this->router->get($route->getName(), $route->getPath(), $route->getAction());
 
@@ -143,10 +134,7 @@ class RouterTest extends TestCase
 
     public function testOptionsRouteSuccess(): void
     {
-        $route = (new Route('/options'))
-            ->setName('optionsRoute')
-            ->setMethod('options')
-            ->setAction(fn () => 'Options action');
+        $route = new Route('optionsRoute', 'options', '/options', fn () => 'Options action');
 
         $this->router->options($route->getName(), $route->getPath(), $route->getAction());
 
@@ -167,10 +155,7 @@ class RouterTest extends TestCase
 
     public function testDeleteRouteSuccess(): void
     {
-        $route = (new Route('/delete'))
-            ->setName('deleteRoute')
-            ->setMethod('delete')
-            ->setAction(fn () => 'Delete action');
+        $route = new Route('deleteRoute', 'delete', '/delete', fn () => 'Delete action');
 
         $this->router->delete($route->getName(), $route->getPath(), $route->getAction());
 
@@ -191,10 +176,7 @@ class RouterTest extends TestCase
 
     public function testPutRouteSuccess(): void
     {
-        $route = (new Route('/put'))
-            ->setName('putRoute')
-            ->setMethod('put')
-            ->setAction(fn () => 'Put action');
+        $route = new Route('putRoute', 'put', '/put', fn () => 'Put action');
 
         $this->router->put($route->getName(), $route->getPath(), $route->getAction());
 
@@ -215,10 +197,7 @@ class RouterTest extends TestCase
 
     public function testPatchRouteSuccess(): void
     {
-        $route = (new Route('/patch'))
-            ->setName('patchRoute')
-            ->setMethod('patch')
-            ->setAction(fn () => 'Patch action');
+        $route = new Route('patchRoute', 'patch', '/patch', fn () => 'Patch action');
 
         $this->router->patch($route->getName(), $route->getPath(), $route->getAction());
 
