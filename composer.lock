@@ -873,24 +873,24 @@
         },
         {
             "name": "echo-fusion/codestandard",
-            "version": "v1.0.3",
+            "version": "v1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/echo-fusion/codestandard.git",
-                "reference": "1a5a1f6354b2874cc0d95e1ad1c53865e1467bb2"
+                "reference": "ec63488b530c63454e450ed7a28f0d96b4fbf6a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/echo-fusion/codestandard/zipball/1a5a1f6354b2874cc0d95e1ad1c53865e1467bb2",
-                "reference": "1a5a1f6354b2874cc0d95e1ad1c53865e1467bb2",
+                "url": "https://api.github.com/repos/echo-fusion/codestandard/zipball/ec63488b530c63454e450ed7a28f0d96b4fbf6a4",
+                "reference": "ec63488b530c63454e450ed7a28f0d96b4fbf6a4",
                 "shasum": ""
             },
             "require": {
                 "php": "~8.1.0 || ~8.2.0 || ~8.3.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "dev-master",
-                "vimeo/psalm": "5.x-dev"
+                "friendsofphp/php-cs-fixer": "^3.64",
+                "vimeo/psalm": "^5.26"
             },
             "type": "library",
             "autoload": {
@@ -909,11 +909,12 @@
                 }
             ],
             "description": "This project contains the code standard for echoFusion framework",
+            "homepage": "https://github.com/echo-fusion/codestandard",
             "support": {
                 "issues": "https://github.com/echo-fusion/codestandard/issues",
-                "source": "https://github.com/echo-fusion/codestandard/tree/v1.0.3"
+                "source": "https://github.com/echo-fusion/codestandard"
             },
-            "time": "2024-09-30T15:49:06+00:00"
+            "time": "2026-10-12T12:01:32+00:00"
         },
         {
             "name": "ergebnis/agent-detector",
