@@ -1,33 +1,33 @@
-# Route manager
+# RouteManager
+
+[![CI](https://github.com/echo-fusion/routemanager/actions/workflows/ci.yml/badge.svg)](https://github.com/echo-fusion/routemanager/actions/workflows/ci.yml) [![Packagist](https://img.shields.io/packagist/v/echo-fusion/routemanager.svg)](https://packagist.org/packages/echo-fusion/routemanager) [![PHP](https://img.shields.io/badge/php-8.1%20%7C%208.2%20%7C%208.3-777bb4.svg)](https://www.php.net) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A lightweight and flexible routing package that helps manage HTTP routes in PHP applications. It supports PSR-7 and PSR-15 standards and is designed for MVC architecture with middleware integration.
 
-## Install
+> Part of [EchoFusion](https://github.com/echo-fusion), a modular PHP framework built from small packages.
 
-Via Composer
+> Part of [EchoFusion](https://github.com/echo-fusion), a modular PHP framework built from small packages.
 
-``` bash
-$ composer require echo-fusion/routemanager
+## Installation
+
+```bash
+composer require echo-fusion/routemanager
 ```
 
 ## Requirements
 
-The following versions of PHP are supported by this version.
+* PHP 8.1, 8.2 or 8.3
 
-* PHP 8.1
-* PHP 8.2
-* PHP 8.3
-
-## Usages
+## Usage
 
 ### Basic Setup
 1. To get started, you can use the RouteMatcher and Router classes directly.
 
     ```php
-    use EchoFusion\RouteManager\RouteMatch;
+    use EchoFusion\RouteManager\RouteMatcher;
     use EchoFusion\RouteManager\Router;
     
-    $routeMatcher = new RouteMatch();
+    $routeMatcher = new RouteMatcher();
     $router = new Router($routeMatcher);
     ```
 
@@ -82,7 +82,8 @@ Once routes are defined, dispatch the request and execute the action if a match 
     ```
 
 ## Using Provider
-The RouteManagerProvider allows you to integrate Router and RouteMatch instances into a dependency injection container.
+
+The RouteManagerProvider allows you to integrate the Router and RouteMatcher instances into a dependency injection container.
 
 1. Register the Provider: Add RouteManagerProvider to your service container.
 
@@ -120,7 +121,6 @@ The RouteManagerProvider allows you to integrate Router and RouteMatch instances
     ```
     If no routes are provided, the boot method defaults to loading routes from routemanager.config.php.
 
-
 3. Dispatching a Route: With the routes registered, retrieve the RouterInterface from the container and dispatch it with a request object.
 
     ```php
@@ -137,21 +137,16 @@ The RouteManagerProvider allows you to integrate Router and RouteMatch instances
     }
     ```
 
-
-
 ## Testing
 
-Testing includes PHPUnit and PHPStan (Level 7).
-
-``` bash
-$ composer test
+```bash
+composer test
 ```
 
 ## Credits
-Developed and maintained by [Amir Shadanfar](https://github.com/amir-shadanfar).  
-Connect on [LinkedIn](https://www.linkedin.com/in/amir-shadanfar).
+
+- [Amir Shadanfar](https://github.com/amir-shadanfar)
 
 ## License
 
-The MIT License (MIT). Please see [License File](https://github.com/echo-fusion/routemanager/blob/main/LICENSE) for more information.
-
+The MIT License (MIT). Please see [LICENSE](LICENSE) for more information.
