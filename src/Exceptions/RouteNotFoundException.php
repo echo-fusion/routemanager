@@ -16,6 +16,6 @@ class RouteNotFoundException extends Exception
 
     public static function forRequest(string $method, string $path): self
     {
-        return new self(sprintf('No route matches %s %s.', mb_strtoupper($method), $path));
+        return new self(sprintf('No route matches %s %s.', strtoupper($method), $path));
     }
 }

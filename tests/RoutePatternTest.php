@@ -82,6 +82,14 @@ final class RoutePatternTest extends TestCase
         $this->assertSame(['t' => 'a#b'], $this->match('/h/{t}', ['t' => '[a-z]#[a-z]'], '/h/a#b'), 'the delimiter in a constraint');
     }
 
+    public function testNonAsciiPaths(): void
+    {
+        $this->assertSame([], $this->match('/خانه', null, '/خانه'));
+        $this->assertSame(['id' => '5'], $this->match('/مقاله/{id}/ویرایش', ['id' => '[0-9]+'], '/مقاله/5/ویرایش'));
+        $this->assertSame(['slug' => 'abc'], $this->match('/ü/{slug:[a-z]+}/é', null, '/ü/abc/é'), 'text after a placeholder is not shifted');
+        $this->assertNull($this->match('/مقاله/{id}', null, '/مقاله-x/5'));
+    }
+
     public function testParameterNamesAreReturnedInOrder(): void
     {
         [, $names] = RoutePattern::compile('/{a}/{b:\d+}/{c}');

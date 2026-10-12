@@ -6,13 +6,13 @@ namespace EchoFusion\RouteManager;
 
 use EchoFusion\RouteManager\Exceptions\InvalidRouteException;
 use function in_array;
-use function mb_strlen;
-use function mb_strpos;
-use function mb_substr;
 use function preg_match;
 use function preg_quote;
 use function preg_replace;
 use function sprintf;
+use function strlen;
+use function strpos;
+use function substr;
 
 /**
  * Turns a route path such as `/post/{id}/{slug:[a-z-]+}` into one anchored regular expression.
@@ -40,7 +40,7 @@ final class RoutePattern
         $constraints ??= [];
         $regex = '';
         $names = [];
-        $length = mb_strlen($path);
+        $length = strlen($path);
         $literalStart = 0;
 
         for ($i = 0; $i < $length; $i++) {
@@ -48,7 +48,7 @@ final class RoutePattern
                 continue;
             }
 
-            $regex .= preg_quote(mb_substr($path, $literalStart, $i - $literalStart), '#');
+            $regex .= preg_quote(substr($path, $literalStart, $i - $literalStart), '#');
 
             // find the closing brace, counting nested braces so `{id:\d{3}}` works
             $depth = 1;
@@ -61,10 +61,10 @@ final class RoutePattern
                 throw new InvalidRouteException(sprintf('The route path "%s" has an unclosed "{".', $path));
             }
 
-            $placeholder = mb_substr($path, $i + 1, $end - $i - 2);
-            $colon = mb_strpos($placeholder, ':');
-            $name = $colon === false ? $placeholder : mb_substr($placeholder, 0, $colon);
-            $inline = $colon === false ? null : mb_substr($placeholder, $colon + 1);
+            $placeholder = substr($path, $i + 1, $end - $i - 2);
+            $colon = strpos($placeholder, ':');
+            $name = $colon === false ? $placeholder : substr($placeholder, 0, $colon);
+            $inline = $colon === false ? null : substr($placeholder, $colon + 1);
 
             if (preg_match('/^\w+$/', $name) !== 1 || preg_match('/^\d/', $name) === 1) {
                 throw new InvalidRouteException(sprintf('"%s" is not a valid parameter name in the route path "%s".', $name, $path));
@@ -86,7 +86,7 @@ final class RoutePattern
             $literalStart = $end;
         }
 
-        $regex .= preg_quote(mb_substr($path, $literalStart), '#');
+        $regex .= preg_quote(substr($path, $literalStart), '#');
 
         $compiled = sprintf('#^%s$#D', $regex);
         if (@preg_match($compiled, '') === false) {
