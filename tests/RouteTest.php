@@ -5,84 +5,63 @@ declare(strict_types=1);
 namespace EchoFusion\RouteManager\Tests;
 
 use Closure;
+use EchoFusion\Contracts\RouteManager\RouteInterface;
 use EchoFusion\RouteManager\Route;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
-class RouteTest extends TestCase
+final class RouteTest extends TestCase
 {
-    public function testConstructorSetsPath(): void
+    public function testItIsCreatedComplete(): void
     {
-        $route = new Route('/test-path');
-        $this->assertSame('/test-path', $route->getPath());
-    }
+        $action = fn () => 'x';
+        $route = new Route('blog.show', 'get', '/post/{id}', $action, ['id' => '[0-9]+'], ['AuthMiddleware']);
 
-    public function testSetAndGetMethod(): void
-    {
-        $route = new Route('/test');
-        $route->setMethod('get');
-
+        $this->assertInstanceOf(RouteInterface::class, $route);
+        $this->assertSame('blog.show', $route->getName());
         $this->assertSame('get', $route->getMethod());
+        $this->assertSame('/post/{id}', $route->getPath());
+        $this->assertSame($action, $route->getAction());
+        $this->assertSame(['id' => '[0-9]+'], $route->getConstraints());
+        $this->assertSame(['AuthMiddleware'], $route->getMiddlewares());
     }
 
-    public function testSetAndGetName(): void
+    public function testOptionalPartsDefaultToNothing(): void
     {
-        $route = new Route('/test');
-        $route->setName('test-route');
+        $route = new Route('home', 'get', '/', [self::class, 'method']);
 
-        $this->assertSame('test-route', $route->getName());
+        $this->assertSame([], $route->getConstraints());
+        $this->assertSame([], $route->getMiddlewares());
+        $this->assertSame([self::class, 'method'], $route->getAction());
     }
 
-    public function testSetAndGetAction(): void
+    public function testActionCanBeAClosureOrAnArray(): void
     {
-        $route = new Route('/test');
-
-        $actionArray = ['Controller', 'method'];
-        $route->setAction($actionArray);
-        $this->assertSame($actionArray, $route->getAction());
-
-        $actionClosure = function () {
-            return 'closure action';
-        };
-        $route->setAction($actionClosure);
-        $this->assertInstanceOf(Closure::class, $route->getAction());
+        $this->assertInstanceOf(Closure::class, (new Route('a', 'get', '/', fn () => null))->getAction());
+        $this->assertIsArray((new Route('b', 'get', '/', ['Controller', 'index']))->getAction());
     }
 
-    public function testSetAndGetMiddlewares(): void
+    public function testWithMiddlewaresReturnsAChangedCopy(): void
     {
-        $route = new Route('/test');
+        $route = new Route('r', 'get', '/', fn () => null, ['id' => '\\d+'], ['First']);
+        $copy = $route->withMiddlewares('Second', 'Third');
 
-        $this->assertEmpty($route->getMiddlewares());
-
-        $existingMiddleware = FakeMiddleware::class;
-        $route->setMiddlewares($existingMiddleware);
-        $this->assertSame([$existingMiddleware], $route->getMiddlewares());
+        $this->assertNotSame($route, $copy);
+        $this->assertSame(['First'], $route->getMiddlewares(), 'the original does not change');
+        $this->assertSame(['First', 'Second', 'Third'], $copy->getMiddlewares());
+        $this->assertSame(['id' => '\\d+'], $copy->getConstraints());
+        $this->assertSame($route->getAction(), $copy->getAction());
+        $this->assertSame('r', $copy->getName());
     }
 
-    public function testSetAndGetConstraints(): void
+    public function testThereAreNoSetters(): void
     {
-        $route = new Route('/test');
-        $constraints = ['id' => '\d+'];
-        $route->setConstraints($constraints);
+        $setters = array_filter(
+            array_map(static fn ($m) => $m->getName(), (new ReflectionClass(Route::class))->getMethods()),
+            static fn (string $name): bool => str_starts_with($name, 'set'),
+        );
 
-        $this->assertSame($constraints, $route->getConstraints());
+        $this->assertSame([], array_values($setters));
+        $this->assertTrue((new ReflectionClass(Route::class))->isFinal());
     }
-
-    public function testSetAndGetArguments(): void
-    {
-        $route = new Route('/test');
-        $arguments = ['id' => 123, 'slug' => 'test-slug'];
-
-        $reflection = new ReflectionClass(Route::class);
-        $property = $reflection->getProperty('arguments');
-        $property->setAccessible(true);
-        $property->setValue($route, $arguments);
-
-        $this->assertSame($arguments, $route->getArguments());
-    }
-}
-
-// Define a mock middleware class for the test case
-class FakeMiddleware
-{
 }

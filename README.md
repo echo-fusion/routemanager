@@ -106,6 +106,17 @@ try {
 }
 ```
 
+## Routes are values
+
+A `Route` is created complete and never changes (`new Route($name, $method, $path, $action, $constraints, $middlewares)`); `withMiddlewares()` returns a changed copy. You normally do not create routes yourself: the `Router` does when you call `get()`, `post()` ..., or `fromArray()`.
+
+## Registering versus dispatching
+
+The `Router` implements two small contracts, so code depends only on what it uses:
+
+* `EchoFusion\Contracts\RouteManager\RouteRegistrarInterface`: `get()`, `post()`, `put()`, `patch()`, `delete()`, `options()` (the code that defines routes, e.g. a route file).
+* `EchoFusion\Contracts\RouteManager\RouterInterface`: `dispatch()`, `getRoute()`, `getRoutes()` (the code that handles requests).
+
 ## Using Provider
 
 The RouteManagerProvider allows you to integrate the Router and RouteMatcher instances into a dependency injection container.
