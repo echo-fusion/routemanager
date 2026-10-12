@@ -81,6 +81,19 @@ Once routes are defined, dispatch the request and execute the action if a match 
     }
     ```
 
+## Path patterns
+
+```php
+$router->get('post', '/post/{id}/{slug}', $action, ['id' => '[0-9]+']);   // constraints array
+$router->get('year', '/archive/{year:\d{4}}', $action);                     // inline constraint
+```
+
+* A placeholder is `{name}` or `{name:regex}`. A `constraints` entry for the same name wins over the inline regex. Without either, a parameter matches `[a-zA-Z0-9_-]+`.
+* Everything outside the placeholders is literal: in `/file.json` the dot is a real dot.
+* Parameters are returned by name (`$routeMatch->getParams()`), even when a constraint has capturing groups of its own.
+* A path that cannot be compiled (unclosed `{`, duplicate or invalid parameter name, broken regex) throws `Exceptions\InvalidRouteException` **when the route is registered**, not on the first request.
+* Methods are compared case-insensitively. When nothing matches, `dispatch()` throws `RouteNotFoundException` whose message says what was requested.
+
 ## Using Provider
 
 The RouteManagerProvider allows you to integrate the Router and RouteMatcher instances into a dependency injection container.
@@ -95,7 +108,7 @@ The RouteManagerProvider allows you to integrate the Router and RouteMatcher ins
     $provider->register($container);
     ```
 
-2. Define Routes Using Configuration: Configure routes by calling the boot method, passing an array of routes or a configuration file.
+2. Define Routes Using Configuration: Configure routes by calling the boot method, passing an array of routes or a configuration file. Only `method`, `path` and `action` are required; `constraints` and `middlewares` are optional.
 
     ```php
     $routes = [
